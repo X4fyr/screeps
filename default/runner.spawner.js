@@ -81,9 +81,9 @@ const spawnerRunner = {
                 roomTask.queues[1]).filter(it => it != null);
             /**@type{spawnTask}*/ let task;
             while (task = queue.pop()) {
-                const name = spawn(queue[0].role, queue[0].body, queue[0].memory, spawnBuilding);
+                const name = spawn(task.role, task.body, task.memory, spawnBuilding);
                 if (!(name < 0)) {
-                    console.log(roomTask.roomName + ': Spawn a ' + queue[0].role + ' with name ' + name);
+                    console.log(roomTask.roomName + ': Spawn a ' + task.role + ' with name ' + name);
                 } else if (name != ERR_BUSY && name != ERR_NOT_ENOUGH_ENERGY) {
                     console.log('spawnerRunner: ' + roomTask.roomName + ": Error spawning: " + name);
                 }
