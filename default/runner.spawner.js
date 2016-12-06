@@ -79,15 +79,6 @@ const spawnerRunner = {
             }
             /**@type{spawnTask[]}*/let queue = roomTask.queues[4].concat(roomTask.queues[3], roomTask.queues[2],
                 roomTask.queues[1]).filter(it => it != null);
-            /**@type{spawnTask}*/ let task;
-            while (task = queue.pop()) {
-                const name = spawn(task.role, task.body, task.memory, spawnBuilding);
-                if (!(name < 0)) {
-                    console.log(roomTask.roomName + ': Spawn a ' + task.role + ' with name ' + name);
-                } else if (name != ERR_BUSY && name != ERR_NOT_ENOUGH_ENERGY) {
-                    console.log('spawnerRunner: ' + roomTask.roomName + ": Error spawning: " + name);
-                }
-            }
             if (Game.time % 10 == 0) {
                 console.log(roomTask.roomName + ': Spawn queue length: ' + queue.length);
                 for (let priority in roomTask.queues) {
@@ -97,6 +88,15 @@ const spawnerRunner = {
                     }
                 }
                 Game.notify(roomTask.roomName + ': Spawn queue length: ' + queue.length, 180);
+            }
+            /**@type{spawnTask}*/ let task;
+            while (task = queue.shift()) {
+                const name = spawn(task.role, task.body, task.memory, spawnBuilding);
+                if (!(name < 0)) {
+                    console.log(roomTask.roomName + ': Spawn a ' + task.role + ' with name ' + name);
+                } else if (name != ERR_BUSY && name != ERR_NOT_ENOUGH_ENERGY) {
+                    console.log('spawnerRunner: ' + roomTask.roomName + ": Error spawning: " + name);
+                }
             }
         }
 
