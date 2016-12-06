@@ -181,7 +181,7 @@ const calculateBodyParts = function (ratios, moveState, maxCost, availableEnergy
     if (maxCost == null) {
         maxCost = availableEnergy;
     }
-    /**@type {bodyparts[]}*/let body = [];
+    /**@type {bodyparts[]}*/let body = Array();
     ratios = ratios.filter(it => it.part && it.ratio);
     if (ratios.length != 0) {
         const usableEnergy = Math.min(maxCost, availableEnergy);
@@ -219,7 +219,7 @@ const calculateBodyParts = function (ratios, moveState, maxCost, availableEnergy
         //noinspection JSPotentiallyInvalidConstructorUsage
         body.push([...Array(moveCount)].map(it => MOVE));
     }
-    body = body.filter(it => it && it != '');
+    body = body.reduce((a,b) => a.concat(b)).filter(it => it && it != '');
     return body;
 };
 
