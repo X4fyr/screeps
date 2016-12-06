@@ -1,6 +1,7 @@
 /**
  * @typedef {(WORK|CARRY|ATTACK|RANGED_ATTACK|TOUGH|HEAL|CLAIM)} nonMoveBodyparts
  * @typedef {(MOVE|WORK|CARRY|ATTACK|RANGED_ATTACK|TOUGH|HEAL|CLAIM)} bodyparts
+ * @typedef {{role: String, body: bodyparts[], memory: Object}} spawnTask;
  */
 
 
@@ -10,16 +11,16 @@ let memory = {};
 let local = {
     queue: [],
     queues: {
-        /** @type {Array<{role:String, body:bodyparts[], memory:Object}>} 1*/
+        /** @type {spawnTask[]} 1*/
         1: [],
-        /** @type {Array<{role:String, body:bodyparts[], memory:Object}>} 2*/
+        /** @type {spawnTask[]} 2*/
         2: [],
-        /** @type {Array<{role:String, body:bodyparts[], memory:Object}>} 3*/
+        /** @type {spawnTask[]} 3*/
         3: [],
-        /** @type {Array<{role:String, body:bodyparts[], memory:Object}>} 4*/
+        /** @type {spawnTask[]} 4*/
         4: []
     },
-    /**@type {{roomName: String, queues: {1: Array<{role:String, body:String[], memory:Object}>, 2: Array<{role:String, body:String[], memory:Object}>, 3: Array<{role:String, body:String[], memory:Object}>, 4: Array<{role:String, body:String[], memory:Object}>}}}}*/
+    /**@type {{roomName: String, queues: {1: spawnTask[], 2: spawnTask[], 3: spawnTask[], 4: spawnTask[]}}}*/
     rooms: {}
 
 };
@@ -27,7 +28,7 @@ let local = {
 /**
  * Spawn a new creep.
  * @param {string} role - role of this creep
- * @param {String[]|} body - array of bodyparts
+ * @param {bodyparts[]} body - array of bodyparts
  * @param {Object} memory - object containing the future memory. role attribute is automatically added
  * @param {StructureSpawn} spawn - Spawn building
  * @returns {string} name of the new creep
@@ -76,11 +77,15 @@ const spawnerRunner = {
                 console.log('spawnerRunner: room ' + roomTask.roomName + ' has no spawn.');
                 return;
             }
-            let queue = roomTask.queues[4].concat(roomTask.queues[3], roomTask.queues[2], roomTask.queues[1]).filter(it => it != null);
-            if (queue[0]) {
+            /**@type{spawnTask[]}*/let queue = roomTask.queues[4].concat(roomTask.queues[3], roomTask.queues[2],
+                roomTask.queues[1]).filter(it => it != null);
+            /**@type{spawnTask}*/ let task;
+            while (task = queue.pop()) {
                 const name = spawn(queue[0].role, queue[0].body, queue[0].memory, spawnBuilding);
                 if (!(name < 0)) {
                     console.log(roomTask.roomName + ': Spawn a ' + queue[0].role + ' with name ' + name);
+                } else if (name != ERR_BUSY && name != ERR_NOT_ENOUGH_ENERGY) {
+                    console.log('spawnerRunner: ' + roomTask.roomName + ": Error spawning: " + name);
                 }
             }
             if (Game.time % 10 == 0) {
