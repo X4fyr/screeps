@@ -32,7 +32,7 @@ let memory = {};
 const local = {};
 
 const workerRunner = {
-    init() {
+    init: function() {
         memory = Memory.runner.worker;
         local.rooms = [];
         for (let roomName of memory.rooms) {
@@ -47,7 +47,7 @@ const workerRunner = {
             }
         }
     },
-    run() {
+    run: function() {
         try {
             missingCreepsRunner();
             collectTargets();
@@ -87,6 +87,10 @@ let creepRunner = function () {
                 creep.memory.refilling = result;
             }
             if (!creep.memory.refilling) {
+                if (roomTask.targets.length == 0) {
+                    creep.say("ntd");
+                    continue;
+                }
                 const targetGroup = roomTask.targets[0];
                 const target = creep.pos.findClosestByRange(targetGroup.target);
                 let result;
