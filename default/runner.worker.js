@@ -1,8 +1,9 @@
 const spawnerRunner = require('runner.spawner');
+const upgraderRunner = require('runner.upgrader');
 const energyProvider = require('provider.energy');
 
 /**@constant*/
-const BUILDER_TARGET = 9;
+const BUILDER_TARGET = 6;
 
 /**@constant*/
 const ROLE_NAME = 'worker';
@@ -25,12 +26,13 @@ const UPGRADE = 'upgrade';
 let memory = {};
 
 /**
- * @type {{rooms:Array<{roomName: string, creeps:Creep[], targets:Array<{target: Array<RoomObject>, task: string}>}>}}
+ * @typedef {{roomName: string, creeps:Creep[], targets:Array<{target: Array<RoomObject>, task: string}>}} RoomTask
+ * @type {{rooms:RoomTask[]}}
  */
 const local = {};
 
 const workerRunner = {
-    init: function () {
+    init() {
         memory = Memory.runner.worker;
         local.rooms = [];
         for (let roomName of memory.rooms) {
@@ -45,7 +47,7 @@ const workerRunner = {
             }
         }
     },
-    run: function () {
+    run() {
         try {
             missingCreepsRunner();
             collectTargets();
@@ -53,6 +55,19 @@ const workerRunner = {
         } catch (err) {
             console.log(err.message + '\n' + err.stack);
         }
+    },
+    /**
+     * @param {String} roomName
+     * @return {?Number} health state between 1-4. Greater is better. null if room not known
+     */
+    healthState(roomName) {
+        if (!local.rooms.hasOwnProperty(roomName)) return null;
+        /**@type {RoomTask}*/ const roomTask = local.rooms[roomName];
+        if (roomTask.creeps.length < BUILDER_TARGET / 3) return 1;
+        else if (roomTask.creeps.length < BUILDER_TARGET * 2 / 3) return 2;
+        else if (roomTask.creeps.length < BUILDER_TARGET) return 3;
+        else return 4;
+
     }
 };
 let creepRunner = function () {
@@ -68,7 +83,7 @@ let creepRunner = function () {
                     creep.say('nfs');
                     creep.moveTo(creep.room.find(FIND_MY_SPAWNS)[0]);
                     continue;
-                    }
+                }
                 creep.memory.refilling = result;
             }
             if (!creep.memory.refilling) {
@@ -110,14 +125,14 @@ let collectTargets = function () {
                 task: UPGRADE
             });
         }
-        if (spawnerRunner.queueState(roomTask.roomName, 4) != 0  || spawnerRunner.queueState(roomTask.roomName, 3) != 0) {
+        if (spawnerRunner.queueState(roomTask.roomName, 4) != 0 || spawnerRunner.queueState(roomTask.roomName, 3) != 0) {
             roomTask.targets.push({
                 target: room.find(FIND_MY_STRUCTURES, {filter: it => (it.structureType == STRUCTURE_EXTENSION || it.structureType == STRUCTURE_SPAWN) && it.energy < it.energyCapacity}),
                 task: FILL
             });
         }
         roomTask.targets.push({
-            target: room.find(FIND_STRUCTURES, {filter: it => it.hits < it.hitsMax * 0.5 && it.structureType != STRUCTURE_WALL && it.structureType != STRUCTURE_RAMPART }),
+            target: room.find(FIND_STRUCTURES, {filter: it => it.hits < it.hitsMax * 0.5 && it.structureType != STRUCTURE_WALL && it.structureType != STRUCTURE_RAMPART}),
             task: REPAIR
         });
         roomTask.targets.push({
@@ -128,10 +143,12 @@ let collectTargets = function () {
             target: room.find(FIND_MY_STRUCTURES, {filter: it => (it.structureType == STRUCTURE_EXTENSION || it.structureType == STRUCTURE_SPAWN) && it.energy < it.energyCapacity}),
             task: FILL
         });
-        roomTask.targets.push({
-            target: [room.controller],
-            task: UPGRADE
-        });
+        if (upgraderRunner.healthState(roomTask.roomName) < 3) {
+            roomTask.targets.push({
+                target: [room.controller],
+                task: UPGRADE
+            });
+        }
         for (let idx in roomTask.targets) {
             if (roomTask.targets.hasOwnProperty(idx)) {
                 let targetGroup = roomTask.targets[idx];

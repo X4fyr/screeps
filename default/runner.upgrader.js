@@ -5,7 +5,8 @@ const UPGRADER_PER_ROOM = 4;
 const ROLE_NAME = "upgrader";
 
 /**
- * @type {{rooms:Array<{roomName:String, creeps: String[]}>}} memory
+ * @typedef {{roomName:String, creeps: String[]}} RoomTask
+ * @type {{rooms:RoomTask[]}} memory
  */
 let memory = {};
 
@@ -20,6 +21,24 @@ const upgraderRunner = {
         creepRunner();
 
         Memory.runner.upgrader = memory;
+    },
+    /**
+     * @param {String} roomName
+     * @return {?Number} health state between 1-4. Greater is better. null if room not known
+     */
+    healthState: function (roomName) {
+        /**@type {RoomTask}*/ let roomTask;
+        for (const it of memory.rooms) {
+            if (it.roomName == roomName) {
+                roomTask = it;
+                break;
+            }
+        }
+        if (!roomTask) return null;
+        else if (roomTask.creeps.length < UPGRADER_PER_ROOM / 3) return 1;
+        else if (roomTask.creeps.length < UPGRADER_PER_ROOM * 2 / 3) return 2;
+        else if (roomTask.creeps.length < UPGRADER_PER_ROOM) return 3;
+        else return 4;
     }
 };
 
