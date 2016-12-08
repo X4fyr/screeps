@@ -122,7 +122,7 @@ const spawnerRunner = {
             priority = 2;
         }
         if (!local.rooms.hasOwnProperty(roomName)) {
-            console.log('spawnerRunner: Trying to spawn in non spawning room.');
+            console.log('spawnerRunner: Trying to spawn in non spawning room: ' + roomName);
             return;
         }
         local.rooms[roomName].queues[priority].push({role: role, body: body, memory: memory});
@@ -142,7 +142,7 @@ const spawnerRunner = {
             priority = 2;
         }
         if (!local.rooms.hasOwnProperty(roomName)) {
-            console.log('spawnerRunner: Trying to spawn in non spawning room.');
+            console.log('spawnerRunner: Trying to spawn in non spawning room: ' + roomName);
             return;
         }
         if (!Game.rooms.hasOwnProperty(roomName)) {
