@@ -153,6 +153,11 @@ let collectTargets = function () {
                 task: UPGRADE
             });
         }
+        /**@type {RoomObject}*/ const weakestObject = room.find(FIND_STRUCTURES, {filter: it => it.hits < it.hitsMax}).sort( (a,b) => a.hits/a.hitsMax - b.hits/b.hitsMax)[0];
+        roomTask.targets.push({
+            target: [weakestObject],
+            task: REPAIR
+        });
         for (let idx in roomTask.targets) {
             if (roomTask.targets.hasOwnProperty(idx)) {
                 let targetGroup = roomTask.targets[idx];
