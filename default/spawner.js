@@ -10,7 +10,7 @@ const spawner = {
         const upgraderTarget = 0;
         const builderTarget = 0;
         let flagBuilderTarget = 0;
-        const conquerorTarget = 1;
+        const conquerorTarget = 0;
 
         const harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
         const upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
