@@ -153,11 +153,6 @@ let collectTargets = function () {
                 task: UPGRADE
             });
         }
-        /**@type {RoomObject}*/ const weakestObject = room.find(FIND_STRUCTURES, {filter: it => it.hits < it.hitsMax}).sort( (a,b) => a.hits/a.hitsMax - b.hits/b.hitsMax)[0];
-        roomTask.targets.push({
-            target: [weakestObject],
-            task: REPAIR
-        });
         for (let idx in roomTask.targets) {
             if (roomTask.targets.hasOwnProperty(idx)) {
                 let targetGroup = roomTask.targets[idx];
@@ -178,7 +173,7 @@ let missingCreepsRunner = function () {
         } else if (roomTask.creeps.length < BUILDER_TARGET * 2 / 3) {
             spawnerRunner.registerMissingCreep(ROLE_NAME, [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE], {roomName: roomTask.roomName}, roomTask.roomName, 3);
         } else if (roomTask.creeps.length < BUILDER_TARGET) {
-            spawnerRunner.registerMissingCreep(ROLE_NAME, [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], {roomName: roomTask.roomName}, roomTask.roomName, 2);
+            spawnerRunner.registerMissingCreepRatio(ROLE_NAME, [{part:WORK, ratio: 1}, {part:CARRY, ratio: 1}], 1, 1000, {roomName: roomTask.roomName}, roomTask.roomName, 2);
         }
     }
 };
