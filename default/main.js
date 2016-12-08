@@ -45,28 +45,26 @@ module.exports.loop = function () {
         }
     }
 
-    const towers = Game.spawns['Spawn1'].room.find(FIND_MY_STRUCTURES, {filter: struct => struct.structureType == STRUCTURE_TOWER});
-    for (let towerId in towers) {
-        if (!towers.hasOwnProperty(towerId)) continue;
-        const tower = towers[towerId];
-        const closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-        if (closestHostile) {
-            tower.attack(closestHostile);
-        }
-
-        const closestDamagedCreep = tower.pos.findClosestByRange(FIND_MY_CREEPS, {filter: creep => creep.hits < creep.hitsMax});
-        if (closestDamagedCreep) {
-            tower.heal(closestDamagedCreep);
-        }
-
-
-        const damagedStructures = Game.rooms[tower.pos.roomName].find(FIND_STRUCTURES, {filter: structure => structure.hits < structure.hitsMax * 0.5}).sort((a, b) => {
-            const aRatio = a.hits / a.hitsMax;
-            const bRatio = b.hits / b.hitsMax;
-            return aRatio - bRatio;
-        });
-        if (damagedStructures.filter(struct => struct != null)[0] && Game.getObjectById('583bab3c98da8b696d5c7cb9').store.energy >= 1000) {
-            tower.repair(damagedStructures.filter(struct => struct != null)[0]);
+    for (const spawnName in Game.spawns) {
+        if (!Game.spawns.hasOwnProperty(spawnName)) continue;
+        const towers = Game.spawns[spawnName].room.find(FIND_MY_STRUCTURES, {filter: struct => struct.structureType == STRUCTURE_TOWER});
+        for (let towerId in towers) {
+            if (!towers.hasOwnProperty(towerId)) continue;
+            const tower = towers[towerId];
+            const closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+            const closestDamagedCreep = tower.pos.findClosestByRange(FIND_MY_CREEPS, {filter: creep => creep.hits < creep.hitsMax});
+            const damagedStructures = Game.rooms[tower.pos.roomName].find(FIND_STRUCTURES, {filter: structure => structure.hits < structure.hitsMax * 0.5}).sort((a, b) => {
+                const aRatio = a.hits / a.hitsMax;
+                const bRatio = b.hits / b.hitsMax;
+                return aRatio - bRatio;
+            });
+            if (closestHostile) {
+                tower.attack(closestHostile);
+            } else if (closestDamagedCreep) {
+                tower.heal(closestDamagedCreep);
+            } else if (damagedStructures.filter(struct => struct != null)[0] && Game.getObjectById('583bab3c98da8b696d5c7cb9').store.energy >= 1000) {
+                tower.repair(damagedStructures.filter(struct => struct != null)[0]);
+            }
         }
     }
 
